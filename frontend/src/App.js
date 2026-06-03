@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
 
-const socket = io('https://your-backend-url.onrender.com'); // Replace with actual URL
+const socket = io('https://killer-in-the-city-ihef.onrender.com'); // Replace with actual URL
 
 export default function App() {
     const [room, setRoom] = useState(null);
