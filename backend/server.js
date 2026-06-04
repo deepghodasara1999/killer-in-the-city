@@ -14,64 +14,91 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 
-// ─── State ────────────────────────────────────────────────────────────────────
-let rooms = {};          // roomId → room
-let socketToRoom = {};   // socketId → { roomId, playerId }
+let rooms = {};
+let socketToRoom = {};
 
-// ─── Phrase banks ─────────────────────────────────────────────────────────────
+// ─── Phrase banks ────────────────────────────────────────────────────────────
 const PHRASES = {
   KILLER: [
     "Who disappears tonight?","Choose a target.","Eliminate someone.",
     "Select a victim.","Who is next?","The city needs a sacrifice.",
     "Silence someone.","Make your move.","Pick a player to remove.",
     "Who survives no longer?","End someone's story.","Tonight's hit is…",
-    "The killer chooses…","Who goes away?","Remove a citizen."
+    "The killer chooses…","Who goes away?","Remove a citizen.",
   ],
   ANGEL: [
     "Who needs protection?","Save someone tonight.","Shield a player.",
     "Guardian's choice.","Who stays alive?","Protect a life.",
     "Cast your shield.","Defend a citizen.","Who will you save?",
     "Prevent a tragedy.","Safety for whom?","Keep someone safe.",
-    "The angel watches…","Shield target…","Save a soul."
+    "The angel watches…","Shield target…","Save a soul.",
   ],
   DETECTIVE: [
     "Who do you suspect?","Identify the killer.","Search for the truth.",
     "Who is guilty?","Investigate a player.","Find the murderer.",
     "Check a suspect.","Reveal the identity.","The detective looks at…",
     "Whose role to see?","Expose the killer.","Point the finger.",
-    "The search begins with…","Inspect someone.","Are they the one?"
+    "The search begins with…","Inspect someone.","Are they the one?",
   ],
 };
 
 const CITIZEN_QS = [
-  { q: "7 × 8 = ?",                opts: ["54","56","58","64"] },
-  { q: "Capital of France?",        opts: ["Berlin","Madrid","Paris","Rome"] },
-  { q: "Which planet is the Red Planet?", opts: ["Venus","Mars","Jupiter","Saturn"] },
-  { q: "Chemical symbol for water?", opts: ["H2O","CO2","O2","H2"] },
-  { q: "12 + 15 = ?",               opts: ["25","27","28","30"] },
-  { q: "Largest ocean on Earth?",   opts: ["Atlantic","Indian","Arctic","Pacific"] },
-  { q: "How many sides does a hexagon have?", opts: ["5","6","7","8"] },
-  { q: "Capital of Japan?",         opts: ["Beijing","Seoul","Tokyo","Bangkok"] },
-  { q: "Who wrote Romeo & Juliet?", opts: ["Dickens","Shakespeare","Austen","Twain"] },
-  { q: "3 × 3 × 3 = ?",            opts: ["9","18","27","81"] },
-  { q: "Fastest land animal?",      opts: ["Lion","Cheetah","Horse","Ostrich"] },
-  { q: "How many continents?",      opts: ["5","6","7","8"] },
-  { q: "Boiling point of water (°C)?", opts: ["90","95","100","110"] },
-  { q: "Capital of Australia?",     opts: ["Sydney","Melbourne","Brisbane","Canberra"] },
-  { q: "Square root of 144?",       opts: ["10","11","12","14"] },
+  { q:"7 × 8 = ?",                        opts:["54","56","58","64"] },
+  { q:"Capital of France?",                opts:["Berlin","Madrid","Paris","Rome"] },
+  { q:"Red Planet?",                       opts:["Venus","Mars","Jupiter","Saturn"] },
+  { q:"Chemical symbol for water?",        opts:["H2O","CO2","O2","H2"] },
+  { q:"12 + 15 = ?",                       opts:["25","27","28","30"] },
+  { q:"Largest ocean?",                    opts:["Atlantic","Indian","Arctic","Pacific"] },
+  { q:"Sides of a hexagon?",               opts:["5","6","7","8"] },
+  { q:"Capital of Japan?",                 opts:["Beijing","Seoul","Tokyo","Bangkok"] },
+  { q:"Who wrote Romeo & Juliet?",         opts:["Dickens","Shakespeare","Austen","Twain"] },
+  { q:"3 × 3 × 3 = ?",                    opts:["9","18","27","81"] },
+  { q:"Fastest land animal?",              opts:["Lion","Cheetah","Horse","Ostrich"] },
+  { q:"How many continents?",              opts:["5","6","7","8"] },
+  { q:"Boiling point of water (°C)?",      opts:["90","95","100","110"] },
+  { q:"Capital of Australia?",             opts:["Sydney","Melbourne","Brisbane","Canberra"] },
+  { q:"√144 = ?",                          opts:["10","11","12","14"] },
+  { q:"Largest planet?",                   opts:["Saturn","Neptune","Jupiter","Uranus"] },
+  { q:"Bones in the adult body?",          opts:["196","206","216","226"] },
+  { q:"Speed of light (km/s)?",            opts:["200k","300k","400k","500k"] },
+  { q:"Currency of Japan?",                opts:["Won","Yuan","Rupee","Yen"] },
+  { q:"Legs on a spider?",                 opts:["6","8","10","12"] },
+  { q:"Longest river?",                    opts:["Amazon","Congo","Nile","Yangtze"] },
+  { q:"Symbol for gold?",                  opts:["Go","Gd","Au","Ag"] },
+  { q:"Piano keys?",                       opts:["76","80","86","88"] },
+  { q:"Capital of Brazil?",                opts:["São Paulo","Rio","Brasília","Salvador"] },
+  { q:"Hours in 3 days?",                  opts:["60","66","72","80"] },
+  { q:"Gas plants absorb?",                opts:["O₂","N₂","CO₂","H₂"] },
+  { q:"Human chromosomes?",               opts:["44","46","48","52"] },
+  { q:"Smallest country?",                 opts:["Monaco","San Marino","Liechtenstein","Vatican City"] },
+  { q:"Strings on a guitar?",              opts:["4","5","6","7"] },
+  { q:"Capital of Canada?",                opts:["Toronto","Vancouver","Montreal","Ottawa"] },
+  { q:"Human ribs?",                       opts:["20","22","24","26"] },
+  { q:"Which planet has rings?",           opts:["Mars","Neptune","Saturn","Uranus"] },
+  { q:"25% of 200 = ?",                    opts:["40","50","60","75"] },
+  { q:"Lightest element?",                 opts:["Helium","Oxygen","Hydrogen","Carbon"] },
+  { q:"Everest is in?",                    opts:["India","Tibet","Nepal","Bhutan"] },
+  { q:"Planets in solar system?",          opts:["7","8","9","10"] },
+  { q:"Universal blood donor type?",       opts:["A","B","AB","O"] },
+  { q:"Largest continent?",               opts:["Africa","Antarctica","Asia","N. America"] },
+  { q:"WWII ended in?",                    opts:["1943","1944","1945","1946"] },
+  { q:"6² + 8² = ?",                      opts:["100","102","96","110"] },
+  { q:"Capital of Germany?",              opts:["Munich","Hamburg","Frankfurt","Berlin"] },
+  { q:"Deepest ocean trench?",            opts:["Java","Puerto Rico","Mariana","Tonga"] },
+  { q:"Inventor of telephone?",           opts:["Edison","Tesla","Bell","Marconi"] },
+  { q:"Adult human teeth?",               opts:["28","30","32","34"] },
+  { q:"Coldest continent?",               opts:["Arctic","Antarctica","Asia","N. America"] },
+  { q:"Symbol for silver?",               opts:["Si","Sv","Ag","Al"] },
+  { q:"Earth to Moon (km)?",              opts:["284k","384k","484k","584k"] },
+  { q:"First iPhone year?",               opts:["2005","2006","2007","2008"] },
+  { q:"Area of a circle?",                opts:["2πr","πr²","πd","2πd"] },
+  { q:"Highest mountain?",                opts:["K2","Kangchenjunga","Everest","Lhotse"] },
 ];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function generateCode() { return Math.floor(100000 + Math.random() * 900000).toString(); }
 
-function generateCode() {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-/**
- * Send each player only what they're allowed to see.
- * Roles are NEVER sent to other players during active play.
- */
+// ─── broadcastRoom ───────────────────────────────────────────────────────────
 function broadcastRoom(roomId) {
   const r = rooms[roomId];
   if (!r) return;
@@ -80,7 +107,6 @@ function broadcastRoom(roomId) {
     const s = io.sockets.sockets.get(player.socketId);
     if (!s) return;
 
-    // Build a sanitised player list: hide other players' roles during play
     const sanitisedPlayers = r.players.map(p => {
       const safe = {
         id: p.id,
@@ -92,22 +118,29 @@ function broadcastRoom(roomId) {
         score: p.score,
         connected: p.connected,
       };
-      // Only reveal roles when game is over (WINNER) or it's the player themselves
-      if (p.id === player.id || r.status === 'WINNER') {
-        safe.role = p.role;
-      } else {
-        safe.role = null;
-      }
+      safe.role = (p.id === player.id || r.status === 'WINNER') ? p.role : null;
       return safe;
     });
 
-    // Build night action state visible to this player
+    // Has this player submitted their night action?
     const myActions = {};
     if (r.nightActions) {
-      // Only tell player if THEY submitted
       const me = r.players.find(p => p.id === player.id);
-      if (me && r.nightActions[me.role] !== undefined) {
-        myActions.submitted = true;
+      if (me) {
+        const key = me.role === 'CITIZEN' ? `CIT_${me.id}` : me.role;
+        if (r.nightActions[key] !== undefined) myActions.submitted = true;
+      }
+    }
+
+    // Phase-specific phrase for this player
+    let phrase = null;
+    if (r.status === 'NIGHT') {
+      const me = r.players.find(p => p.id === player.id);
+      if (me && me.alive) {
+        if      (me.role === 'KILLER')    phrase = { text: r.phrases?.KILLER,    type: 'action' };
+        else if (me.role === 'ANGEL')     phrase = { text: r.phrases?.ANGEL,     type: 'action' };
+        else if (me.role === 'DETECTIVE') phrase = { text: r.phrases?.DETECTIVE, type: 'action' };
+        else phrase = { text: r.citQ?.q, opts: r.citQ?.opts, type: 'citizen' };
       }
     }
 
@@ -119,44 +152,37 @@ function broadcastRoom(roomId) {
       config: r.config,
       logs: r.logs,
       timer: r.timer,
+      maxTimer: r.maxTimer,
       round: r.round,
       sessionNumber: r.sessionNumber,
-      votingResults: r.status === 'VOTING_RESULT' || r.status === 'WINNER' ? r.votingResults : null,
+      votingResults: (r.status === 'VOTING_RESULT' || r.status === 'WINNER') ? r.votingResults : null,
+      outcome: r.status === 'WINNER' ? r.outcome : null,
       myActions,
-      // Night question phrase — only relevant role sees the right phrase
-      phrase: (() => {
-        const me = r.players.find(p => p.id === player.id);
-        if (!me || !me.alive) return null;
-        if (r.status !== 'NIGHT') return null;
-        if (me.role === 'KILLER') return { text: r.phrases?.KILLER, type: 'action' };
-        if (me.role === 'ANGEL') return { text: r.phrases?.ANGEL, type: 'action' };
-        if (me.role === 'DETECTIVE') return { text: r.phrases?.DETECTIVE, type: 'action' };
-        return { text: r.citQ?.q, opts: r.citQ?.opts, type: 'citizen' };
-      })(),
+      phrase,
     });
   });
 }
 
 function clearRoomTimer(roomId) {
   const r = rooms[roomId];
-  if (r && r._interval) {
-    clearInterval(r._interval);
-    r._interval = null;
-  }
+  if (r?._interval) { clearInterval(r._interval); r._interval = null; }
 }
 
+// runTimer: sets maxTimer once, ticks down, emits lightweight tick every second
 function runTimer(roomId, seconds, onExpire) {
   clearRoomTimer(roomId);
   const r = rooms[roomId];
   if (!r) return;
   r.timer = seconds;
+  r.maxTimer = seconds;
   broadcastRoom(roomId);
 
   r._interval = setInterval(() => {
     const room = rooms[roomId];
     if (!room) { clearInterval(r._interval); return; }
     room.timer = Math.max(0, room.timer - 1);
-    broadcastRoom(roomId);
+    // Lightweight tick — avoids sending full state every second
+    io.to(roomId).emit('tick', { timer: room.timer, maxTimer: room.maxTimer });
     if (room.timer <= 0) {
       clearRoomTimer(roomId);
       onExpire(roomId);
@@ -164,63 +190,13 @@ function runTimer(roomId, seconds, onExpire) {
   }, 1000);
 }
 
-// ─── Night resolution ─────────────────────────────────────────────────────────
-function resolveNight(roomId) {
-  const r = rooms[roomId];
-  const acts = r.nightActions || {};
-  let deaths = [];
-
-  // Step 1: Detective
-  const detective = r.players.find(p => p.role === 'DETECTIVE' && p.alive);
-  if (detective && acts['DETECTIVE'] && acts['DETECTIVE'] !== 'NOT_SURE') {
-    const guessed = r.players.find(p => p.id === acts['DETECTIVE']);
-    if (guessed && guessed.role === 'KILLER') {
-      return finish(roomId, 'CITY_WIN_DET', 'Detective identified the Killer! City wins!');
-    } else {
-      // Wrong guess — detective dies, cannot be saved
-      detective.alive = false;
-      deaths.push(detective.name);
-    }
-  }
-
-  // Step 2: Killer attack + Angel save
-  const killerTarget = acts['KILLER'];
-  const angelTarget = acts['ANGEL'];
-  if (killerTarget && killerTarget !== angelTarget) {
-    const target = r.players.find(p => p.id === killerTarget && p.alive);
-    if (target) {
-      target.alive = false;
-      deaths.push(target.name);
-    }
-  }
-
-  // Build result message
-  if (deaths.length === 0) {
-    r.logs = 'No one was killed tonight. Find the killer!';
-  } else {
-    r.logs = `${deaths.join(' and ')} died. Find the killer!`;
-  }
-
-  // Check win after night
-  if (!checkWin(roomId)) {
-    startDiscussion(roomId);
-  }
-}
-
-function checkWin(roomId) {
-  const r = rooms[roomId];
-  const killerAlive = r.players.find(p => p.role === 'KILLER' && p.alive);
-  const othersAlive = r.players.filter(p => p.role !== 'KILLER' && p.alive).length;
-
-  if (!killerAlive) {
-    finish(roomId, 'CITY_WIN_VOTE', 'Killer eliminated! City wins!');
-    return true;
-  }
-  if (othersAlive <= 1) {
-    finish(roomId, 'KILLER_WIN', 'Killer took control of the city!');
-    return true;
-  }
-  return false;
+// ─── Game flow ───────────────────────────────────────────────────────────────
+function assignRoles(r) {
+  const shuffled = [...r.players].sort(() => Math.random() - 0.5);
+  shuffled.forEach(p => { p.role = 'CITIZEN'; p.alive = true; });
+  shuffled[0].role = 'KILLER';
+  shuffled[1].role = 'ANGEL';
+  if (r.players.length >= 6) shuffled[2].role = 'DETECTIVE';
 }
 
 function startNight(roomId) {
@@ -232,37 +208,70 @@ function startNight(roomId) {
   r.votingResults = null;
   r.round = (r.round || 0) + 1;
   r.phrases = {
-    KILLER: pick(PHRASES.KILLER),
-    ANGEL: pick(PHRASES.ANGEL),
+    KILLER:    pick(PHRASES.KILLER),
+    ANGEL:     pick(PHRASES.ANGEL),
     DETECTIVE: pick(PHRASES.DETECTIVE),
   };
   r.citQ = pick(CITIZEN_QS);
-  r.logs = `Round ${r.round} — Night falls on the city…`;
-
+  r.logs = `Round ${r.round} — Night falls…`;
   broadcastRoom(roomId);
 
-  // Auto-submit after question time expires
-  runTimer(roomId, r.config.questionTime, (rid) => {
+  runTimer(roomId, r.config.questionTime, rid => {
     const room = rooms[rid];
     if (!room) return;
-    // Auto-fill missing submissions
-    const alivePlayers = room.players.filter(p => p.alive);
-    const killer = alivePlayers.find(p => p.role === 'KILLER');
-    const angel = alivePlayers.find(p => p.role === 'ANGEL');
-    const detective = alivePlayers.find(p => p.role === 'DETECTIVE');
-    const validTargets = alivePlayers.filter(p => p.role !== 'KILLER').map(p => p.id);
-
-    if (killer && !room.nightActions['KILLER'] && validTargets.length > 0) {
-      room.nightActions['KILLER'] = pick(validTargets);
-    }
-    if (angel && !room.nightActions['ANGEL']) {
-      room.nightActions['ANGEL'] = pick(alivePlayers.map(p => p.id));
-    }
-    if (detective && !room.nightActions['DETECTIVE']) {
-      room.nightActions['DETECTIVE'] = 'NOT_SURE';
-    }
+    const alive = room.players.filter(p => p.alive);
+    const validT = alive.filter(p => p.role !== 'KILLER').map(p => p.id);
+    if (alive.find(p => p.role === 'KILLER')    && !room.nightActions['KILLER'])    room.nightActions['KILLER']    = validT.length ? pick(validT) : null;
+    if (alive.find(p => p.role === 'ANGEL')     && !room.nightActions['ANGEL'])     room.nightActions['ANGEL']     = pick(alive.map(p => p.id));
+    if (alive.find(p => p.role === 'DETECTIVE') && !room.nightActions['DETECTIVE']) room.nightActions['DETECTIVE'] = 'NOT_SURE';
+    alive.filter(p => p.role === 'CITIZEN').forEach(p => {
+      if (!room.nightActions[`CIT_${p.id}`]) room.nightActions[`CIT_${p.id}`] = 'TIMEOUT';
+    });
     resolveNight(rid);
   });
+}
+
+function resolveNight(roomId) {
+  const r = rooms[roomId];
+  const acts = r.nightActions || {};
+  let deaths = [];
+
+  // Detective guess
+  const detective = r.players.find(p => p.role === 'DETECTIVE' && p.alive);
+  if (detective) {
+    const guess = acts['DETECTIVE'];
+    if (guess && guess !== 'NOT_SURE') {
+      const guessed = r.players.find(p => p.id === guess);
+      if (guessed?.role === 'KILLER') {
+        return finish(roomId, 'CITY_WIN_DET', 'Detective identified the Killer! City wins!');
+      }
+      detective.alive = false;
+      deaths.push(detective.name);
+    }
+  }
+
+  // Killer attack (blocked by Angel)
+  const killerTarget = acts['KILLER'];
+  const angelTarget  = acts['ANGEL'];
+  if (killerTarget && killerTarget !== angelTarget) {
+    const target = r.players.find(p => p.id === killerTarget && p.alive);
+    if (target) { target.alive = false; deaths.push(target.name); }
+  }
+
+  r.logs = deaths.length > 0
+    ? `${deaths.join(' & ')} ${deaths.length === 1 ? 'was' : 'were'} killed tonight.`
+    : 'No one was killed tonight.';
+
+  if (!checkWin(roomId)) startDiscussion(roomId);
+}
+
+function checkWin(roomId) {
+  const r = rooms[roomId];
+  const killerAlive  = r.players.find(p => p.role === 'KILLER' && p.alive);
+  const othersAlive  = r.players.filter(p => p.role !== 'KILLER' && p.alive).length;
+  if (!killerAlive)     { finish(roomId, 'CITY_WIN_VOTE', 'Killer eliminated! City wins!'); return true; }
+  if (othersAlive <= 1) { finish(roomId, 'KILLER_WIN',   'Killer took control of the city!'); return true; }
+  return false;
 }
 
 function startDiscussion(roomId) {
@@ -290,15 +299,15 @@ function resolveVoting(roomId) {
   const counts = {};
   Object.values(r.votes).forEach(id => { counts[id] = (counts[id] || 0) + 1; });
 
-  // Build voting results for display
-  r.votingResults = r.players.map(p => ({
-    id: p.id,
-    name: p.name,
-    votes: counts[p.id] || 0,
-    voters: Object.entries(r.votes)
-      .filter(([, tid]) => tid === p.id)
-      .map(([vid]) => { const voter = r.players.find(pl => pl.id === vid); return voter?.name || '?'; }),
-  })).filter(p => p.votes > 0);
+  r.votingResults = r.players
+    .filter(p => counts[p.id])
+    .map(p => ({
+      id: p.id, name: p.name, votes: counts[p.id] || 0,
+      voters: Object.entries(r.votes)
+        .filter(([, t]) => t === p.id)
+        .map(([vid]) => r.players.find(pl => pl.id === vid)?.name || '?'),
+    }))
+    .sort((a, b) => b.votes - a.votes);
 
   let max = 0, topId = null, tie = false;
   for (const [id, cnt] of Object.entries(counts)) {
@@ -309,30 +318,16 @@ function resolveVoting(roomId) {
   r.status = 'VOTING_RESULT';
 
   if (tie || !topId) {
-    r.logs = "City couldn't reach a consensus. No one was eliminated.";
+    r.logs = "No consensus. No one was eliminated.";
     broadcastRoom(roomId);
     runTimer(roomId, r.config.resultDuration, startNight);
     return;
   }
 
-  const eliminated = r.players.find(p => p.id === topId);
-  if (eliminated) {
-    eliminated.alive = false;
-    if (eliminated.role === 'KILLER') {
-      r.logs = `City eliminated ${eliminated.name}. City wins!`;
-      broadcastRoom(roomId);
-      setTimeout(() => finish(roomId, 'CITY_WIN_VOTE', `City identified the Killer!`), 1500);
-      return;
-    } else {
-      r.logs = `City eliminated ${eliminated.name}.`;
-    }
-  }
-
+  const elim = r.players.find(p => p.id === topId);
+  if (elim) { elim.alive = false; r.logs = `City eliminated ${elim.name}.`; }
   broadcastRoom(roomId);
-
-  if (!checkWin(roomId)) {
-    runTimer(roomId, r.config.resultDuration, startNight);
-  }
+  if (!checkWin(roomId)) runTimer(roomId, r.config.resultDuration, startNight);
 }
 
 function finish(roomId, outcome, reason) {
@@ -340,212 +335,153 @@ function finish(roomId, outcome, reason) {
   if (!r) return;
   clearRoomTimer(roomId);
   r.status = 'WINNER';
-  r.logs = reason;
   r.outcome = outcome;
-
-  // Award scores
+  r.logs = reason;
+  r.timer = 0;
+  r.maxTimer = 0;
   r.players.forEach(p => {
-    if (outcome === 'KILLER_WIN' && p.role === 'KILLER') p.score += 2;
-    if (outcome === 'CITY_WIN_DET' && p.role === 'DETECTIVE') p.score += 2;
-    if ((outcome === 'CITY_WIN_VOTE' || outcome === 'CITY_WIN_DET') && p.role !== 'KILLER' && p.alive) p.score += 1;
+    if (outcome === 'KILLER_WIN'                                                  && p.role === 'KILLER')    p.score += 2;
+    if (outcome === 'CITY_WIN_DET'                                                && p.role === 'DETECTIVE') p.score += 2;
+    if ((outcome === 'CITY_WIN_VOTE' || outcome === 'CITY_WIN_DET') && p.alive   && p.role !== 'KILLER')    p.score += 1;
   });
-
   broadcastRoom(roomId);
 }
 
-// ─── Socket handlers ──────────────────────────────────────────────────────────
-io.on('connection', (socket) => {
+// ─── Socket handlers ─────────────────────────────────────────────────────────
+io.on('connection', socket => {
 
-  // ── Create room ──
   socket.on('createRoom', ({ name }) => {
-    if (!name || !name.trim()) return socket.emit('joinError', 'Please enter your name.');
-    const roomId = generateCode();
+    if (!name?.trim()) return socket.emit('joinError', 'Please enter your name.');
+    const roomId   = generateCode();
     const playerId = `p_${socket.id}`;
-
     rooms[roomId] = {
-      id: roomId,
-      hostId: playerId,
-      status: 'LOBBY',
-      players: [{
-        id: playerId,
-        socketId: socket.id,
-        name: name.trim(),
-        avatar: 1,
-        score: 0,
-        alive: true,
-        role: null,
-        seat: null,
-        connected: true,
-      }],
-      config: {
-        discussionTime: 150,
-        votingTime: 30,
-        questionTime: 20,
-        resultDuration: 10,
-        detectiveMode: 'ALWAYS',
-      },
-      nightActions: {},
-      votes: {},
-      votingResults: null,
-      logs: 'Waiting for players to join…',
-      timer: 0,
-      round: 0,
-      sessionNumber: 0,
-      _interval: null,
+      id: roomId, hostId: playerId, status: 'LOBBY',
+      players: [{ id: playerId, socketId: socket.id, name: name.trim(), avatar: 1, score: 0, alive: true, role: null, seat: null, connected: true }],
+      config: { roleRevealTime: 12, questionTime: 20, discussionTime: 120, votingTime: 30, resultDuration: 8 },
+      nightActions: {}, votes: {}, votingResults: null,
+      logs: 'Waiting for players to join…', timer: 0, maxTimer: 0, round: 0, sessionNumber: 0, _interval: null,
     };
-
     socketToRoom[socket.id] = { roomId, playerId };
     socket.join(roomId);
     broadcastRoom(roomId);
     socket.emit('joined', { roomId, playerId });
   });
 
-  // ── Join room ──
   socket.on('joinRoom', ({ roomId, name }) => {
-    if (!name || !name.trim()) return socket.emit('joinError', 'Please enter your name.');
-    if (!roomId || !roomId.trim()) return socket.emit('joinError', 'Please enter the game code.');
-
+    if (!name?.trim())  return socket.emit('joinError', 'Please enter your name.');
+    if (!roomId?.trim()) return socket.emit('joinError', 'Please enter the game code.');
     const r = rooms[roomId];
-    if (!r) return socket.emit('joinError', 'Game not found. Check the code and try again.');
-    if (r.status !== 'LOBBY') return socket.emit('joinError', 'Game already started.');
+    if (!r)                    return socket.emit('joinError', 'Game not found. Check the code and try again.');
+    if (r.status !== 'LOBBY')  return socket.emit('joinError', 'Game already started.');
     if (r.players.length >= 25) return socket.emit('joinError', 'Room is full (max 25 players).');
-
     const playerId = `p_${socket.id}`;
-    const avatar = r.players.length + 1;
-
-    r.players.push({
-      id: playerId,
-      socketId: socket.id,
-      name: name.trim(),
-      avatar,
-      score: 0,
-      alive: true,
-      role: null,
-      seat: null,
-      connected: true,
-    });
-
+    r.players.push({ id: playerId, socketId: socket.id, name: name.trim(), avatar: r.players.length + 1, score: 0, alive: true, role: null, seat: null, connected: true });
     socketToRoom[socket.id] = { roomId, playerId };
     socket.join(roomId);
     broadcastRoom(roomId);
     socket.emit('joined', { roomId, playerId });
   });
 
-  // ── Reconnect (player refreshed) ──
-  socket.on('reconnect', ({ roomId, playerId }) => {
+  // IMPORTANT: named 'rejoinGame' (not 'reconnect') to avoid collision with socket.io internals
+  socket.on('rejoinGame', ({ roomId, playerId }) => {
     const r = rooms[roomId];
-    if (!r) return socket.emit('joinError', 'Game no longer exists.');
-
+    if (!r)                                      return socket.emit('rejoinFailed', 'Game no longer exists.');
     const player = r.players.find(p => p.id === playerId);
-    if (!player) return socket.emit('joinError', 'Could not find your player in this game.');
-
-    // Update socket reference
-    const oldSocketId = player.socketId;
-    player.socketId = socket.id;
+    if (!player)                                 return socket.emit('rejoinFailed', 'Player not found in this game.');
+    delete socketToRoom[player.socketId];
+    player.socketId  = socket.id;
     player.connected = true;
-
-    // Update socketToRoom map
-    delete socketToRoom[oldSocketId];
     socketToRoom[socket.id] = { roomId, playerId };
-
-    // If player was host, update host socket
     socket.join(roomId);
     broadcastRoom(roomId);
     socket.emit('joined', { roomId, playerId });
   });
 
-  // ── Seat assignment ──
-  socket.on('assignSeat', ({ roomId, playerId, seatIdx }) => {
-    const r = rooms[roomId];
-    const info = socketToRoom[socket.id];
-    if (!r || !info || r.hostId !== info.playerId) return;
-    const p = r.players.find(pl => pl.id === playerId);
-    if (p) p.seat = seatIdx;
-    broadcastRoom(roomId);
-  });
-
-  // ── Update config ──
   socket.on('updateConfig', ({ roomId, config }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
     r.config = { ...r.config, ...config };
     broadcastRoom(roomId);
   });
 
-  // ── Start session ──
   socket.on('startSession', ({ roomId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
     if (r.players.length < 4) return socket.emit('joinError', 'Need at least 4 players to start.');
-
     r.sessionNumber = (r.sessionNumber || 0) + 1;
     r.round = 0;
-
-    // Assign roles
-    const shuffled = [...r.players].sort(() => Math.random() - 0.5);
-    shuffled.forEach(p => { p.role = 'CITIZEN'; p.alive = true; });
-    shuffled[0].role = 'KILLER';
-    shuffled[1].role = 'ANGEL';
-
-    const useDetective = r.config.detectiveMode === 'ALWAYS'
-      ? r.players.length >= 6
-      : r.players.length >= 6 && Math.random() > 0.5;
-
-    if (useDetective) shuffled[2].role = 'DETECTIVE';
-
+    assignRoles(r);
     r.status = 'ROLE_REVEAL';
-    r.logs = `Session ${r.sessionNumber} — Roles assigned. Check your role!`;
+    r.logs = `Session ${r.sessionNumber} — Check your role!`;
     broadcastRoom(roomId);
-
-    // Auto-advance from role reveal after 10s
-    runTimer(roomId, 10, startNight);
+    runTimer(roomId, r.config.roleRevealTime, startNight);
   });
 
-  // ── Night action ──
+  socket.on('startNextSession', ({ roomId }) => {
+    const r    = rooms[roomId];
+    const info = socketToRoom[socket.id];
+    if (!r || !info || r.hostId !== info.playerId) return;
+    clearRoomTimer(roomId);
+    r.sessionNumber = (r.sessionNumber || 0) + 1;
+    r.round = 0;
+    r.players.forEach(p => { p.alive = true; p.role = null; });
+    assignRoles(r);
+    r.status = 'ROLE_REVEAL';
+    r.logs = `Session ${r.sessionNumber} — New roles!`;
+    broadcastRoom(roomId);
+    runTimer(roomId, r.config.roleRevealTime, startNight);
+  });
+
+  socket.on('restartSession', ({ roomId }) => {
+    const r    = rooms[roomId];
+    const info = socketToRoom[socket.id];
+    if (!r || !info || r.hostId !== info.playerId) return;
+    clearRoomTimer(roomId);
+    r.round = 0;
+    r.players.forEach(p => { p.alive = true; p.role = null; });
+    assignRoles(r);
+    r.status = 'ROLE_REVEAL';
+    r.logs = `Session ${r.sessionNumber} — Restarted!`;
+    broadcastRoom(roomId);
+    runTimer(roomId, r.config.roleRevealTime, startNight);
+  });
+
   socket.on('submitNightAction', ({ roomId, targetId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.status !== 'NIGHT') return;
     const me = r.players.find(p => p.id === info.playerId);
     if (!me || !me.alive) return;
-    r.nightActions[me.role] = targetId;
 
-    // Check if all active roles have submitted
-    const alive = r.players.filter(p => p.alive);
-    const needKiller = alive.some(p => p.role === 'KILLER');
-    const needAngel = alive.some(p => p.role === 'ANGEL');
-    const needDetective = alive.some(p => p.role === 'DETECTIVE');
+    const key = me.role === 'CITIZEN' ? `CIT_${me.id}` : me.role;
+    r.nightActions[key] = targetId;
 
-    const allSubmitted =
-      (!needKiller || r.nightActions['KILLER']) &&
-      (!needAngel || r.nightActions['ANGEL']) &&
-      (!needDetective || r.nightActions['DETECTIVE']);
+    const alive        = r.players.filter(p => p.alive);
+    const killerDone   = !alive.find(p => p.role === 'KILLER')    || r.nightActions['KILLER'];
+    const angelDone    = !alive.find(p => p.role === 'ANGEL')     || r.nightActions['ANGEL'];
+    const detectiveDone= !alive.find(p => p.role === 'DETECTIVE') || r.nightActions['DETECTIVE'];
+    const citizensDone = alive.filter(p => p.role === 'CITIZEN').every(p => r.nightActions[`CIT_${p.id}`]);
 
-    if (allSubmitted) {
+    if (killerDone && angelDone && detectiveDone && citizensDone) {
       clearRoomTimer(roomId);
       resolveNight(roomId);
     } else {
-      broadcastRoom(roomId); // update "submitted" state for the player
+      broadcastRoom(roomId);
     }
   });
 
-  // ── Vote ──
   socket.on('submitVote', ({ roomId, targetId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.status !== 'VOTING') return;
     const me = r.players.find(p => p.id === info.playerId);
     if (!me || !me.alive) return;
-    // Only allow one vote
     if (r.votes[info.playerId]) return;
     r.votes[info.playerId] = targetId;
-
-    // Check if all alive players voted
     const aliveIds = r.players.filter(p => p.alive).map(p => p.id);
-    const allVoted = aliveIds.every(id => r.votes[id]);
-    if (allVoted) {
+    if (aliveIds.every(id => r.votes[id])) {
       clearRoomTimer(roomId);
       resolveVoting(roomId);
     } else {
@@ -553,9 +489,8 @@ io.on('connection', (socket) => {
     }
   });
 
-  // ── Host controls ──
   socket.on('pauseGame', ({ roomId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
     clearRoomTimer(roomId);
@@ -565,36 +500,41 @@ io.on('connection', (socket) => {
   });
 
   socket.on('resumeGame', ({ roomId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
     r.paused = false;
     r.logs = 'Game resumed.';
-    if (r.status === 'DISCUSSION') runTimer(roomId, r.timer || r.config.discussionTime, startVoting);
-    else if (r.status === 'VOTING') runTimer(roomId, r.timer || r.config.votingTime, resolveVoting);
+    const rem = r.timer > 0 ? r.timer : 10;
+    if      (r.status === 'DISCUSSION') runTimer(roomId, rem, startVoting);
+    else if (r.status === 'VOTING')     runTimer(roomId, rem, resolveVoting);
+    else if (r.status === 'NIGHT')      runTimer(roomId, rem, rid => {
+      const room = rooms[rid]; if (!room) return;
+      const alive = room.players.filter(p => p.alive);
+      if (alive.find(p => p.role === 'KILLER')    && !room.nightActions['KILLER'])    room.nightActions['KILLER']    = pick(alive.filter(p => p.role !== 'KILLER').map(p => p.id));
+      if (alive.find(p => p.role === 'ANGEL')     && !room.nightActions['ANGEL'])     room.nightActions['ANGEL']     = pick(alive.map(p => p.id));
+      if (alive.find(p => p.role === 'DETECTIVE') && !room.nightActions['DETECTIVE']) room.nightActions['DETECTIVE'] = 'NOT_SURE';
+      resolveNight(rid);
+    });
     broadcastRoom(roomId);
   });
 
-  socket.on('restartSession', ({ roomId }) => {
-    const r = rooms[roomId];
+  socket.on('removePlayer', ({ roomId, playerId }) => {
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
-    clearRoomTimer(roomId);
-    socket.emit('startSession', { roomId }); // reuse logic
-  });
-
-  socket.on('startNextSession', ({ roomId }) => {
-    const r = rooms[roomId];
-    const info = socketToRoom[socket.id];
-    if (!r || !info || r.hostId !== info.playerId) return;
-    clearRoomTimer(roomId);
-    // Keep scores, reset session state
-    r.players.forEach(p => { p.alive = true; p.role = null; });
-    socket.emit('startSession', { roomId });
+    r.players = r.players.filter(p => p.id !== playerId);
+    if (r.status !== 'LOBBY') {
+      clearRoomTimer(roomId);
+      r.status = 'LOBBY';
+      r.players.forEach(p => { p.alive = true; p.role = null; });
+      r.logs = 'A player was removed. Session cancelled.';
+    }
+    broadcastRoom(roomId);
   });
 
   socket.on('endGame', ({ roomId }) => {
-    const r = rooms[roomId];
+    const r    = rooms[roomId];
     const info = socketToRoom[socket.id];
     if (!r || !info || r.hostId !== info.playerId) return;
     clearRoomTimer(roomId);
@@ -602,47 +542,26 @@ io.on('connection', (socket) => {
     delete rooms[roomId];
   });
 
-  socket.on('removePlayer', ({ roomId, playerId }) => {
-    const r = rooms[roomId];
-    const info = socketToRoom[socket.id];
-    if (!r || !info || r.hostId !== info.playerId) return;
-    r.players = r.players.filter(p => p.id !== playerId);
-    // Cancel current session if in play
-    if (r.status !== 'LOBBY') {
-      clearRoomTimer(roomId);
-      r.status = 'LOBBY';
-      r.players.forEach(p => { p.alive = true; p.role = null; });
-      r.logs = 'A player was removed. Session cancelled. Start a new session.';
-    }
-    broadcastRoom(roomId);
-  });
-
-  // ── Disconnect ──
   socket.on('disconnect', () => {
     const info = socketToRoom[socket.id];
     if (!info) return;
     const { roomId, playerId } = info;
     delete socketToRoom[socket.id];
-
     const r = rooms[roomId];
     if (!r) return;
-
     const player = r.players.find(p => p.id === playerId);
     if (player) player.connected = false;
-
     if (r.hostId === playerId) {
-      // Host left — terminate game
       io.to(roomId).emit('hostLeft');
       clearRoomTimer(roomId);
       delete rooms[roomId];
     } else {
-      // Non-host disconnected — mark them, give 30s grace
       r.logs = `${player?.name || 'A player'} disconnected.`;
       broadcastRoom(roomId);
     }
   });
 });
 
-server.listen(process.env.PORT || 4000, () => {
-  console.log('Killer City backend running on port', process.env.PORT || 4000);
-});
+server.listen(process.env.PORT || 4000, () =>
+  console.log('Killer City backend on port', process.env.PORT || 4000)
+);
