@@ -307,7 +307,11 @@ export default function App() {
     return (
       <Screen>
         <div className="flex flex-col items-center justify-center min-h-screen gap-5">
-          <div className="text-5xl">🔪</div>
+          <div className="text-center select-none">
+            <div className="text-6xl mb-3">🔪</div>
+            <h1 className="text-4xl font-black text-red-500 tracking-tight">KILLER</h1>
+            <h2 className="text-2xl font-black text-zinc-400 tracking-widest">IN THE CITY</h2>
+          </div>
           <Spinner size={10} />
           <p className="text-zinc-500 text-sm">
             {appState === 'booting' ? 'Reconnecting to game…' : 'Joining…'}
