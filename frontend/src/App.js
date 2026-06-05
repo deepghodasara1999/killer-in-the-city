@@ -370,7 +370,7 @@ export default function App() {
                 {error}
               </div>
             )}
-            <input className="input-field border-red-300" placeholder="Your name" value={name} maxLength={20}
+            <input className="input-field border-red-950" placeholder="Your name" value={name} maxLength={20}
               onChange={e => { setName(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleHost()} />
           </div>
