@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://killer-in-the-city-ihef.onrender.com';
+// const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://killer-in-the-city-ihef.onrender.com';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'killer-in-the-city-production.up.railway.app';
+
 
 // ─── Avatar system ────────────────────────────────────────────────────────────
 const AVATARS = [
