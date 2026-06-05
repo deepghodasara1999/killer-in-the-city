@@ -370,12 +370,12 @@ export default function App() {
                 {error}
               </div>
             )}
-            <input className="input-field" placeholder="Your name" value={name} maxLength={20}
+            <input className="input-field bg-red" placeholder="Your name" value={name} maxLength={20}
               onChange={e => { setName(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleHost()} />
           </div>
                 
-          <div className="w-full max-w-xs space-y-3">
+          <div className="w-full max-w-xs space-y-3 mt-5">
             <input className="input-field text-center tracking-widest text-xl font-bold"
               placeholder="Game code" value={code} inputMode="numeric" maxLength={6}
               onChange={e => { setCode(e.target.value.replace(/\D/g,'').slice(0,6)); setError(''); }}
