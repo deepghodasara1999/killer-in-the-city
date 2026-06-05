@@ -8,15 +8,16 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://killer-in-the-
 // ─── Avatar system ────────────────────────────────────────────────────────────
 const AVATARS = [
   { bg:'#c0392b', border:'#e74c3c', emoji:'🦊' },
+  { bg:'#8e44ad', border:'#9b59b6', emoji:'🦄' },
   { bg:'#d35400', border:'#e67e22', emoji:'🐺' },
+  { bg:'#e91e63', border:'#f06292', emoji:'🦋' },
   { bg:'#f39c12', border:'#f1c40f', emoji:'🦁' },
+  { bg:'#00bcd4', border:'#80deea', emoji:'🦚' },
   { bg:'#16a085', border:'#1abc9c', emoji:'🐯' },
   { bg:'#27ae60', border:'#2ecc71', emoji:'🐻' },
   { bg:'#2980b9', border:'#3498db', emoji:'🦝' },
-  { bg:'#8e44ad', border:'#9b59b6', emoji:'🦄' },
   { bg:'#2c3e50', border:'#34495e', emoji:'🐸' },
   { bg:'#c0392b', border:'#e74c3c', emoji:'🐧' },
-  { bg:'#e91e63', border:'#f06292', emoji:'🦋' },
   { bg:'#ff5722', border:'#ff8a65', emoji:'🦈' },
   { bg:'#795548', border:'#a1887f', emoji:'🐉' },
   { bg:'#607d8b', border:'#90a4ae', emoji:'🦅' },
@@ -24,7 +25,7 @@ const AVATARS = [
   { bg:'#3f51b5', border:'#7986cb', emoji:'🐬' },
   { bg:'#673ab7', border:'#9575cd', emoji:'🦔' },
   { bg:'#f44336', border:'#ef9a9a', emoji:'🦩' },
-  { bg:'#00bcd4', border:'#80deea', emoji:'🦚' },
+  
   { bg:'#4caf50', border:'#a5d6a7', emoji:'🐊' },
   { bg:'#ff9800', border:'#ffcc80', emoji:'🦘' },
   { bg:'#9c27b0', border:'#ce93d8', emoji:'🦞' },
