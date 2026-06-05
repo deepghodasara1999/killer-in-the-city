@@ -319,7 +319,7 @@ export default function App() {
           </div>
           <Spinner size={10} />
           <p className="text-zinc-500 text-sm">
-            {appState === 'booting' ? 'Reconnecting to game…' : 'Joining…'}
+            {appState === 'booting' ? 'Connecting…' : 'Joining…'}
           </p>
         </div>
       </Screen>
@@ -364,7 +364,7 @@ export default function App() {
             <h2 className="text-2xl font-black text-zinc-400 tracking-widest">IN THE CITY</h2>
           </div>
 
-          <div className="w-full max-w-xs space-y-3">
+          <div className="w-full max-w-xs space-y-3 mb-10">
             {error && (
               <div className="bg-red-900/30 border border-red-800 text-red-300 text-sm rounded-2xl p-3 text-center">
                 {error}
