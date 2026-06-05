@@ -483,9 +483,9 @@ export default function App() {
             )}
           </div>
 
-          {!showRole && (
-            <button className="btn-primary" onClick={() => setShowRole(true)}>👁  Show My Role</button>
-          )}
+          // {!showRole && (
+          //   <button className="btn-primary" onClick={() => setShowRole(true)}>👁  Show My Role</button>
+          // )}
 
           {isHost && (
             <button className="btn-secondary w-full mt-2"
