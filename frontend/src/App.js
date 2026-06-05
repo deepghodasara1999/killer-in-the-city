@@ -374,7 +374,7 @@ export default function App() {
               onChange={e => { setName(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleHost()} />
             <Divider label="" />
-            <button className="btn-primary w-full mb-2" onClick={handleHost}>🎮  Host a Game</button>
+            <button className="btn-primary w-full mt-2" onClick={handleHost}>🎮  Host a Game</button>
             <Divider label="or join" />
             <input className="input-field text-center tracking-widest text-xl font-bold"
               placeholder="Game code" value={code} inputMode="numeric" maxLength={6}
@@ -489,9 +489,7 @@ export default function App() {
             )}
           </div>
 
-          // {!showRole && (
-          //   <button className="btn-primary" onClick={() => setShowRole(true)}>👁  Show My Role</button>
-          // )}
+          
 
           {isHost && (
             <button className="btn-secondary w-full mt-2"
