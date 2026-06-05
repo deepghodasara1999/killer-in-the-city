@@ -370,11 +370,10 @@ export default function App() {
                 {error}
               </div>
             )}
-            <input className="input-field mb-2" placeholder="Your name" value={name} maxLength={20}
+            <input className="input-field mb-5" placeholder="Your name" value={name} maxLength={20}
               onChange={e => { setName(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleHost()} />
-            <Divider label="" />
-            <button className="btn-primary w-full mt-2" onClick={handleHost}>🎮  Host a Game</button>
+            <button className="btn-primary w-full mt-5" onClick={handleHost}>🎮  Host a Game</button>
             <Divider label="or join" />
             <input className="input-field text-center tracking-widest text-xl font-bold"
               placeholder="Game code" value={code} inputMode="numeric" maxLength={6}
