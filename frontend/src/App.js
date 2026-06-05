@@ -102,6 +102,8 @@ function Tag({ children, color = 'zinc' }) {
   return <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${map[color]||map.zinc}`}>{children}</span>;
 }
 
+
+
 function Divider({ label }) {
   return (
     <div className="flex items-center gap-3 my-1">
@@ -368,10 +370,11 @@ export default function App() {
                 {error}
               </div>
             )}
-            <input className="input-field" placeholder="Your name" value={name} maxLength={20}
+            <input className="input-field mb-2" placeholder="Your name" value={name} maxLength={20}
               onChange={e => { setName(e.target.value); setError(''); }}
               onKeyDown={e => e.key === 'Enter' && handleHost()} />
-            <button className="btn-primary w-full" onClick={handleHost}>🎮  Host a Game</button>
+            <Divider label="" />
+            <button className="btn-primary w-full mb-2" onClick={handleHost}>🎮  Host a Game</button>
             <Divider label="or join" />
             <input className="input-field text-center tracking-widest text-xl font-bold"
               placeholder="Game code" value={code} inputMode="numeric" maxLength={6}
